@@ -1,6 +1,7 @@
 'use client'
 
-import { Search, Code, Brain, ArrowRight } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Search, Code, Brain, ArrowRight, LucideIcon } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
 import {
   Carousel,
@@ -9,47 +10,65 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "./ui/carousel";
+import { getServices, Service } from "@/lib/api";
 
-const services = [
-  {
-    icon: Search,
-    title: "SEO & Digital Marketing",
-    description:
-      "Boost your online presence with data-driven SEO strategies and comprehensive digital marketing campaigns that deliver measurable results.",
-    features: [
-      "Search Engine Optimization",
-      "Content Marketing Strategy",
-      "Social Media Management",
-      "PPC Campaign Management",
-    ],
-  },
-  {
-    icon: Code,
-    title: "Custom Software Development",
-    description:
-      "Build scalable, secure, and innovative software solutions tailored to your business needs using modern technologies and best practices.",
-    features: [
-      "Web Application Development",
-      "Mobile App Development",
-      "API Integration & Development",
-      "Legacy System Modernization",
-    ],
-  },
-  {
-    icon: Brain,
-    title: "AI/LLM Integration Solutions",
-    description:
-      "Harness the power of artificial intelligence and large language models to automate processes and create intelligent business solutions.",
-    features: [
-      "ChatGPT Integration",
-      "Custom AI Model Training",
-      "Process Automation",
-      "Intelligent Data Analysis",
-    ],
-  },
-];
+// Icon mapping
+const iconMap: Record<string, LucideIcon> = {
+  Search,
+  Code,
+  Brain,
+};
+
+type ServiceWithIcon = Service & { IconComponent: LucideIcon };
 
 export function ServicesBlock() {
+  const [services, setServices] = useState<ServiceWithIcon[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function fetchServices() {
+      try {
+        const data = await getServices();
+        const servicesWithIcons = data.map(service => ({
+          ...service,
+          IconComponent: iconMap[service.icon] || Search,
+        }));
+        setServices(servicesWithIcons);
+      } catch (err) {
+        console.error('Failed to fetch services:', err);
+        setError('Failed to load services. Please try again later.');
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchServices();
+  }, []);
+
+  if (loading) {
+    return (
+      <section id="services" className="py-20 md:py-32 bg-slate-900">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center">
+            <div className="inline-block animate-pulse text-slate-400">
+              Loading services...
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (error) {
+    return (
+      <section id="services" className="py-20 md:py-32 bg-slate-900">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center text-red-400">{error}</div>
+        </div>
+      </section>
+    );
+  }
   return (
     <section id="services" className="py-20 md:py-32 bg-slate-900">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -71,8 +90,8 @@ export function ServicesBlock() {
 
         {/* Desktop: Grid Layout */}
         <div className="hidden md:grid md:grid-cols-3 gap-8">
-          {services.map((service, index) => (
-            <ServiceCard key={index} service={service} />
+          {services.map((service) => (
+            <ServiceCard key={service.id} service={service} />
           ))}
         </div>
 
@@ -80,8 +99,8 @@ export function ServicesBlock() {
         <div className="md:hidden">
           <Carousel className="w-full max-w-sm mx-auto">
             <CarouselContent>
-              {services.map((service, index) => (
-                <CarouselItem key={index}>
+              {services.map((service) => (
+                <CarouselItem key={service.id}>
                   <ServiceCard service={service} />
                 </CarouselItem>
               ))}
@@ -95,8 +114,8 @@ export function ServicesBlock() {
   );
 }
 
-function ServiceCard({ service }: { service: typeof services[0] }) {
-  const Icon = service.icon;
+function ServiceCard({ service }: { service: ServiceWithIcon }) {
+  const Icon = service.IconComponent;
 
   return (
     <Card className="bg-slate-950/50 border-white/10 hover:border-blue-500/50 transition-all duration-300 group hover:shadow-lg hover:shadow-blue-500/20">
