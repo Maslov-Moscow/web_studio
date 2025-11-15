@@ -1,7 +1,12 @@
 {
   "permissions": {
     "allow": [
-      "Bash(mkdir:*)"
+      "Bash(mkdir:*)",
+      "Bash(tree:*)",
+      "Bash(sed:*)",
+      "Bash(find:*)",
+      "Bash(docker compose build:*)",
+      "Bash(docker compose:*)"
     ],
     "deny": [],
     "ask": []

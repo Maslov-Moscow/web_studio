@@ -1,18 +1,34 @@
-FROM node:20-alpine
-
+# Этап 1: Сборка
+FROM node:20-alpine AS builder
 WORKDIR /app
 
-# Copy package files
+# Копируем package-файлы
 COPY package*.json ./
 
-# Install dependencies
+# Устанавливаем все зависимости (нужны dev-зависимости для сборки)
 RUN npm install
 
-# Copy project files
+# Копируем код
 COPY . .
 
-# Expose port
+# Создаем директорию public если не существует
+RUN mkdir -p public
+
+# Сборка Next.js
+RUN npm run build
+
+# Этап 2: Продакшн
+FROM node:20-alpine AS runner
+WORKDIR /app
+
+# Копируем standalone + статику
+COPY --from=builder /app/.next/standalone ./
+COPY --from=builder /app/.next/static ./.next/static
+COPY --from=builder /app/public ./public
+
+ENV NODE_ENV=production
+ENV PORT=3000
+
 EXPOSE 3000
 
-# Start development server
-CMD ["npm", "run", "dev"]
+CMD ["node", "server.js"]

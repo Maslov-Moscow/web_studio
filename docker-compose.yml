@@ -45,15 +45,10 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
     container_name: webstudio_frontend
-    command: npm run dev
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules
-      - /app/.next
     ports:
       - "3000:3000"
     environment:
-      - NODE_ENV=development
+      - NODE_ENV=production
     depends_on:
       - backend
 
