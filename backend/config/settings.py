@@ -97,9 +97,20 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://frontend:3000",
     "http://localhost",
+    "http://localhost:8080",
 ]
 
 CORS_ALLOW_CREDENTIALS = True
+
+# CSRF Settings for Nginx proxy
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:8080",
+    "http://localhost",
+]
+
+CSRF_COOKIE_SECURE = False
+CSRF_COOKIE_HTTPONLY = False
+CSRF_COOKIE_SAMESITE = 'Lax'
 
 # REST Framework Settings
 REST_FRAMEWORK = {
