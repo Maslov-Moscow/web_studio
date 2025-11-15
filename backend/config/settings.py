@@ -92,14 +92,16 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# CORS Settings
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",
-    "http://frontend:3000",
-    "http://localhost",
-]
-
+# CORS Settings - Allow all origins for development
+CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
+
+# CSRF Settings - Permissive for development
+CSRF_TRUSTED_ORIGINS = ['http://*', 'https://*']
+CSRF_COOKIE_SECURE = False
+CSRF_COOKIE_HTTPONLY = False
+CSRF_COOKIE_SAMESITE = None
+SESSION_COOKIE_SAMESITE = None
 
 # REST Framework Settings
 REST_FRAMEWORK = {
