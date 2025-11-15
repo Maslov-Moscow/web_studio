@@ -1,7 +1,26 @@
+'use client'
+
+import { useState, useEffect } from "react";
 import { Button } from "./ui/button";
 import { ArrowRight, Sparkles } from "lucide-react";
+import { getCompanyStats, CompanyStat } from "@/lib/api";
 
 export function HeroSection() {
+  const [stats, setStats] = useState<CompanyStat[]>([]);
+
+  useEffect(() => {
+    async function fetchStats() {
+      try {
+        const data = await getCompanyStats();
+        // Take only the first 3 stats for hero section
+        setStats(data.slice(0, 3));
+      } catch (err) {
+        console.error('Failed to fetch stats:', err);
+      }
+    }
+
+    fetchStats();
+  }, []);
   return (
     <section className="relative overflow-hidden bg-slate-950 py-20 md:py-32">
       {/* Background gradient */}
@@ -55,24 +74,31 @@ export function HeroSection() {
 
           {/* Stats */}
           <div className="mt-16 grid grid-cols-3 gap-8 border-t border-white/10 pt-10">
-            <div>
-              <div className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent mb-2">
-                150+
-              </div>
-              <p className="text-sm text-slate-400">Projects Completed</p>
-            </div>
-            <div>
-              <div className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent mb-2">
-                98%
-              </div>
-              <p className="text-sm text-slate-400">Client Satisfaction</p>
-            </div>
-            <div>
-              <div className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent mb-2">
-                5+
-              </div>
-              <p className="text-sm text-slate-400">Years Experience</p>
-            </div>
+            {stats.length > 0 ? (
+              stats.map((stat) => (
+                <div key={stat.id}>
+                  <div className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent mb-2">
+                    {stat.value}
+                  </div>
+                  <p className="text-sm text-slate-400">{stat.description || stat.label}</p>
+                </div>
+              ))
+            ) : (
+              <>
+                <div className="animate-pulse">
+                  <div className="h-10 bg-slate-800 rounded mb-2"></div>
+                  <div className="h-4 bg-slate-800 rounded w-3/4"></div>
+                </div>
+                <div className="animate-pulse">
+                  <div className="h-10 bg-slate-800 rounded mb-2"></div>
+                  <div className="h-4 bg-slate-800 rounded w-3/4"></div>
+                </div>
+                <div className="animate-pulse">
+                  <div className="h-10 bg-slate-800 rounded mb-2"></div>
+                  <div className="h-4 bg-slate-800 rounded w-3/4"></div>
+                </div>
+              </>
+            )}
           </div>
         </div>
       </div>

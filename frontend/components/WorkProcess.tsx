@@ -1,60 +1,57 @@
 'use client'
 
-import { FileSearch, Lightbulb, Code2, Rocket } from "lucide-react";
+import { useState, useEffect } from "react";
+import { FileSearch, Lightbulb, Code2, Rocket, Search, FileText, LucideIcon } from "lucide-react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "./ui/accordion";
+import { getProcessSteps, ProcessStep } from "@/lib/api";
 
-const steps = [
-  {
-    number: "01",
-    icon: FileSearch,
-    title: "Discovery & Analysis",
-    description: "We start by understanding your business goals and challenges",
-    points: [
-      "Business requirements gathering",
-      "Market and competitor analysis",
-      "Technical feasibility assessment",
-      "Project scope definition",
-    ],
-  },
-  {
-    number: "02",
-    icon: Lightbulb,
-    title: "Strategy & Planning",
-    description: "Developing a comprehensive roadmap for your project",
-    points: [
-      "Solution architecture design",
-      "Technology stack selection",
-      "Timeline and milestone planning",
-      "Resource allocation",
-    ],
-  },
-  {
-    number: "03",
-    icon: Code2,
-    title: "Development & Testing",
-    description: "Building your solution with best practices and quality assurance",
-    points: [
-      "Agile development process",
-      "Regular progress updates",
-      "Continuous integration & testing",
-      "Code review and optimization",
-    ],
-  },
-  {
-    number: "04",
-    icon: Rocket,
-    title: "Launch & Support",
-    description: "Deploying your solution and ensuring long-term success",
-    points: [
-      "Production deployment",
-      "User training and documentation",
-      "Performance monitoring",
-      "Ongoing maintenance and updates",
-    ],
-  },
-];
+// Icon mapping
+const iconMap: Record<string, LucideIcon> = {
+  FileSearch,
+  Search,
+  Lightbulb,
+  Code2,
+  Code: Code2,
+  FileText,
+  Rocket,
+};
+
+type ProcessStepWithIcon = ProcessStep & { IconComponent: LucideIcon };
 
 export function WorkProcess() {
+  const [steps, setSteps] = useState<ProcessStepWithIcon[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchSteps() {
+      try {
+        const data = await getProcessSteps();
+        const stepsWithIcons = data.map(step => ({
+          ...step,
+          IconComponent: iconMap[step.icon] || FileSearch,
+        }));
+        setSteps(stepsWithIcons);
+      } catch (err) {
+        console.error('Failed to fetch process steps:', err);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchSteps();
+  }, []);
+
+  if (loading) {
+    return (
+      <section className="py-20 md:py-32 bg-slate-900">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center text-slate-400 animate-pulse">
+            Loading process steps...
+          </div>
+        </div>
+      </section>
+    );
+  }
   return (
     <section className="py-20 md:py-32 bg-slate-900">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -75,49 +72,51 @@ export function WorkProcess() {
 
         {/* Desktop: Column Layout */}
         <div className="hidden md:grid md:grid-cols-4 gap-8">
-          {steps.map((step, index) => (
-            <StepCard key={index} step={step} />
+          {steps.map((step) => (
+            <StepCard key={step.id} step={step} />
           ))}
         </div>
 
         {/* Mobile: Accordion */}
         <div className="md:hidden">
           <Accordion type="single" collapsible className="w-full">
-            {steps.map((step, index) => (
-              <AccordionItem
-                key={index}
-                value={`item-${index}`}
-                className="border-white/10"
-              >
-                <AccordionTrigger className="text-left hover:no-underline">
-                  <div className="flex items-center gap-4">
-                    <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500 to-purple-600">
-                      {(() => {
-                        const Icon = step.icon;
-                        return <Icon className="h-6 w-6 text-white" />;
-                      })()}
+            {steps.map((step) => {
+              const Icon = step.IconComponent;
+              return (
+                <AccordionItem
+                  key={step.id}
+                  value={`item-${step.id}`}
+                  className="border-white/10"
+                >
+                  <AccordionTrigger className="text-left hover:no-underline">
+                    <div className="flex items-center gap-4">
+                      <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500 to-purple-600">
+                        <Icon className="h-6 w-6 text-white" />
+                      </div>
+                      <div>
+                        <div className="text-sm text-slate-500 mb-1">
+                          {String(step.step_number).padStart(2, '0')}
+                        </div>
+                        <div className="text-white font-medium">{step.title}</div>
+                      </div>
                     </div>
-                    <div>
-                      <div className="text-sm text-slate-500 mb-1">{step.number}</div>
-                      <div className="text-white font-medium">{step.title}</div>
+                  </AccordionTrigger>
+                  <AccordionContent>
+                    <div className="pl-16 pt-4">
+                      <p className="text-slate-400 mb-4">{step.description}</p>
+                      <ul className="space-y-2">
+                        {step.points.map((point, idx) => (
+                          <li key={idx} className="flex items-start text-sm text-slate-300">
+                            <span className="mr-2 mt-1.5 h-1.5 w-1.5 rounded-full bg-gradient-to-r from-blue-400 to-purple-500 flex-shrink-0" />
+                            {point}
+                          </li>
+                        ))}
+                      </ul>
                     </div>
-                  </div>
-                </AccordionTrigger>
-                <AccordionContent>
-                  <div className="pl-16 pt-4">
-                    <p className="text-slate-400 mb-4">{step.description}</p>
-                    <ul className="space-y-2">
-                      {step.points.map((point, idx) => (
-                        <li key={idx} className="flex items-start text-sm text-slate-300">
-                          <span className="mr-2 mt-1.5 h-1.5 w-1.5 rounded-full bg-gradient-to-r from-blue-400 to-purple-500 flex-shrink-0" />
-                          {point}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </AccordionContent>
-              </AccordionItem>
-            ))}
+                  </AccordionContent>
+                </AccordionItem>
+              );
+            })}
           </Accordion>
         </div>
       </div>
@@ -125,8 +124,8 @@ export function WorkProcess() {
   );
 }
 
-function StepCard({ step }: { step: typeof steps[0] }) {
-  const Icon = step.icon;
+function StepCard({ step }: { step: ProcessStepWithIcon }) {
+  const Icon = step.IconComponent;
 
   return (
     <div className="relative group">
@@ -136,7 +135,7 @@ function StepCard({ step }: { step: typeof steps[0] }) {
       <div className="relative">
         {/* Number Badge */}
         <div className="absolute -top-3 -left-3 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-purple-600 text-xs font-bold text-white">
-          {step.number}
+          {String(step.step_number).padStart(2, '0')}
         </div>
 
         {/* Icon */}

@@ -1,28 +1,43 @@
-import { Target, Users, Award, TrendingUp } from "lucide-react";
+'use client'
+
+import { useState, useEffect } from "react";
+import { Target, Users, Award, TrendingUp, LucideIcon } from "lucide-react";
+import { getCompanyStats, CompanyStat } from "@/lib/api";
+
+// Icon mapping for stats
+const iconMap: Record<string, LucideIcon> = {
+  Target,
+  Users,
+  Award,
+  TrendingUp,
+};
+
+type StatWithIcon = CompanyStat & { IconComponent: LucideIcon };
 
 export function AboutUs() {
-  const achievements = [
-    {
-      icon: Target,
-      number: "150+",
-      label: "Successful Projects",
-    },
-    {
-      icon: Users,
-      number: "80+",
-      label: "Happy Clients",
-    },
-    {
-      icon: Award,
-      number: "15+",
-      label: "Industry Awards",
-    },
-    {
-      icon: TrendingUp,
-      number: "98%",
-      label: "Client Retention",
-    },
-  ];
+  const [achievements, setAchievements] = useState<StatWithIcon[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchStats() {
+      try {
+        const data = await getCompanyStats();
+        // Take only the first 4 stats for the about section
+        const statsWithIcons = data.slice(0, 4).map((stat, index) => ({
+          ...stat,
+          // Assign icons in order: Target, Users, Award, TrendingUp
+          IconComponent: [Target, Users, Award, TrendingUp][index] || Target,
+        }));
+        setAchievements(statsWithIcons);
+      } catch (err) {
+        console.error('Failed to fetch company stats:', err);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchStats();
+  }, []);
 
   return (
     <section id="about" className="py-20 md:py-32 bg-slate-950">
@@ -70,22 +85,26 @@ export function AboutUs() {
 
             {/* Achievements Grid */}
             <div className="grid grid-cols-2 gap-6">
-              {achievements.map((achievement, index) => {
-                const Icon = achievement.icon;
-                return (
-                  <div key={index} className="space-y-2">
-                    <div className="flex items-center gap-3">
-                      <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-blue-500/10 to-purple-600/10 flex items-center justify-center">
-                        <Icon className="h-5 w-5 text-blue-400" />
+              {loading ? (
+                <div className="col-span-2 text-slate-400 animate-pulse">Loading stats...</div>
+              ) : (
+                achievements.map((achievement) => {
+                  const Icon = achievement.IconComponent;
+                  return (
+                    <div key={achievement.id} className="space-y-2">
+                      <div className="flex items-center gap-3">
+                        <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-blue-500/10 to-purple-600/10 flex items-center justify-center">
+                          <Icon className="h-5 w-5 text-blue-400" />
+                        </div>
+                        <div className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
+                          {achievement.value}
+                        </div>
                       </div>
-                      <div className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
-                        {achievement.number}
-                      </div>
+                      <p className="text-sm text-slate-400">{achievement.description || achievement.label}</p>
                     </div>
-                    <p className="text-sm text-slate-400">{achievement.label}</p>
-                  </div>
-                );
-              })}
+                  );
+                })
+              )}
             </div>
           </div>
         </div>
