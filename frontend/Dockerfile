@@ -2,11 +2,13 @@
 FROM node:20-alpine AS builder
 WORKDIR /app
 
-# Копируем package-файлы
-COPY package*.json ./
+# Копируем package-файлы и .npmrc
+COPY package*.json .npmrc ./
 
-# Устанавливаем все зависимости (нужны dev-зависимости для сборки)
-RUN npm install
+# Устанавливаем все зависимости с retry логикой
+RUN npm install --legacy-peer-deps || \
+    (sleep 5 && npm install --legacy-peer-deps) || \
+    (sleep 10 && npm install --legacy-peer-deps)
 
 # Копируем код
 COPY . .
