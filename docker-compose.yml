@@ -54,6 +54,8 @@ services:
       - "3000:3000"
     environment:
       - NODE_ENV=production
+      # Internal API URL for SSR - используется только в runtime на сервере
+      - NEXT_PUBLIC_API_URL_INTERNAL=http://nginx/api
     depends_on:
       - backend
 
