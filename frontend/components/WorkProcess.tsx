@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { FileSearch, Lightbulb, Code2, Rocket, Search, FileText, LucideIcon } from "lucide-react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "./ui/accordion";
 import { getProcessSteps, ProcessStep } from "@/lib/api";
+import { SectionHeader } from "./SectionHeader";
 
 // Icon mapping
 const iconMap: Record<string, LucideIcon> = {
@@ -56,19 +57,7 @@ export function WorkProcess() {
     <section className="py-20 md:py-32 bg-slate-900">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
-        <div className="text-center mb-16">
-          <div className="inline-block mb-4 px-4 py-2 rounded-full bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-500/20">
-            <span className="text-sm bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent font-semibold">
-              Our Process
-            </span>
-          </div>
-          <h2 className="mb-4 text-3xl md:text-4xl font-bold text-white">
-            How We Work
-          </h2>
-          <p className="text-lg text-slate-400 max-w-2xl mx-auto">
-            A proven methodology that ensures successful project delivery from concept to launch
-          </p>
-        </div>
+        <SectionHeader sectionKey="process" />
 
         {/* Desktop: Column Layout */}
         <div className="hidden md:grid md:grid-cols-4 gap-8">
