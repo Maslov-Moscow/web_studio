@@ -1,7 +1,22 @@
 // API configuration and utility functions
 import { z } from 'zod';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || '/api';
+// For client-side requests (browser), use relative path through nginx
+// For server-side requests (SSR), use internal Docker network URL
+const getApiBaseUrl = () => {
+  // Check if we're on the server (Node.js) or client (browser)
+  const isServer = typeof window === 'undefined';
+
+  if (isServer) {
+    // Server-side: use internal Docker URL to nginx or backend
+    // This allows SSR to fetch data through the internal network
+    return process.env.NEXT_PUBLIC_API_URL_INTERNAL || 'http://nginx/api';
+  }
+
+  // Client-side: use relative path (goes through nginx proxy)
+  return process.env.NEXT_PUBLIC_API_URL || '/api';
+};
+
 const USE_MOCK_API = process.env.NEXT_PUBLIC_USE_MOCK_API === 'true';
 
 // Zod schemas for runtime validation
@@ -554,7 +569,9 @@ async function fetchAPI<T>(
     return schema.parse(mockData);
   }
 
-  const url = `${API_BASE_URL}${endpoint}`;
+  // Get the API base URL dynamically (determines client vs server)
+  const apiBaseUrl = getApiBaseUrl();
+  const url = `${apiBaseUrl}${endpoint}`;
 
   try {
     const response = await fetch(url, {
@@ -637,7 +654,8 @@ export async function submitContactInquiry(data: ContactInquiry): Promise<void> 
     return;
   }
 
-  await fetch(`${API_BASE_URL}/contact/`, {
+  const apiBaseUrl = getApiBaseUrl();
+  await fetch(`${apiBaseUrl}/contact/`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
