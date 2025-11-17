@@ -12,6 +12,7 @@ import {
 } from "./ui/carousel";
 import { getServices, Service } from "@/lib/api";
 import { SectionHeader } from "./SectionHeader";
+import { useInView } from "@/lib/useInView";
 
 // Icon mapping
 const iconMap: Record<string, LucideIcon> = {
@@ -26,8 +27,12 @@ export function ServicesBlock() {
   const [services, setServices] = useState<ServiceWithIcon[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { ref, isInView } = useInView({ threshold: 0.1, rootMargin: '100px' });
 
   useEffect(() => {
+    // Only fetch when component is in view
+    if (!isInView) return;
+
     async function fetchServices() {
       try {
         const data = await getServices();
@@ -45,11 +50,11 @@ export function ServicesBlock() {
     }
 
     fetchServices();
-  }, []);
+  }, [isInView]);
 
   if (loading) {
     return (
-      <section id="services" className="py-20 md:py-32 bg-slate-900">
+      <section ref={ref as any} id="services" className="py-20 md:py-32 bg-slate-900">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <div className="inline-block animate-pulse text-slate-400">
@@ -63,7 +68,7 @@ export function ServicesBlock() {
 
   if (error) {
     return (
-      <section id="services" className="py-20 md:py-32 bg-slate-900">
+      <section ref={ref as any} id="services" className="py-20 md:py-32 bg-slate-900">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center text-red-400">{error}</div>
         </div>
@@ -71,7 +76,7 @@ export function ServicesBlock() {
     );
   }
   return (
-    <section id="services" className="py-20 md:py-32 bg-slate-900">
+    <section ref={ref as any} id="services" className="py-20 md:py-32 bg-slate-900">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <SectionHeader sectionKey="services" />

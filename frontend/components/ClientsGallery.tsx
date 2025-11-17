@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import { getClients, Client, getTrustIndicators, TrustIndicator } from "@/lib/api";
 import { SectionHeader } from "./SectionHeader";
+import { useInView } from "@/lib/useInView";
 
 // Color mapping for trust indicators
 const colorMap: Record<string, string> = {
@@ -18,8 +19,12 @@ export function ClientsGallery() {
   const [clients, setClients] = useState<Client[]>([]);
   const [trustIndicators, setTrustIndicators] = useState<TrustIndicator[]>([]);
   const [loading, setLoading] = useState(true);
+  const { ref, isInView } = useInView({ threshold: 0.1, rootMargin: '100px' });
 
   useEffect(() => {
+    // Only fetch when component is in view
+    if (!isInView) return;
+
     async function fetchData() {
       try {
         const [clientsData, trustData] = await Promise.all([
@@ -36,10 +41,10 @@ export function ClientsGallery() {
     }
 
     fetchData();
-  }, []);
+  }, [isInView]);
 
   return (
-    <section id="cases" className="py-20 bg-slate-950">
+    <section ref={ref as any} id="cases" className="py-20 bg-slate-950">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <SectionHeader sectionKey="clients" />

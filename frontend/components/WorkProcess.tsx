@@ -5,6 +5,7 @@ import { FileSearch, Lightbulb, Code2, Rocket, Search, FileText, LucideIcon } fr
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "./ui/accordion";
 import { getProcessSteps, ProcessStep } from "@/lib/api";
 import { SectionHeader } from "./SectionHeader";
+import { useInView } from "@/lib/useInView";
 
 // Icon mapping
 const iconMap: Record<string, LucideIcon> = {
@@ -22,8 +23,12 @@ type ProcessStepWithIcon = ProcessStep & { IconComponent: LucideIcon };
 export function WorkProcess() {
   const [steps, setSteps] = useState<ProcessStepWithIcon[]>([]);
   const [loading, setLoading] = useState(true);
+  const { ref, isInView } = useInView({ threshold: 0.1, rootMargin: '100px' });
 
   useEffect(() => {
+    // Only fetch when component is in view
+    if (!isInView) return;
+
     async function fetchSteps() {
       try {
         const data = await getProcessSteps();
@@ -40,11 +45,11 @@ export function WorkProcess() {
     }
 
     fetchSteps();
-  }, []);
+  }, [isInView]);
 
   if (loading) {
     return (
-      <section className="py-20 md:py-32 bg-slate-900">
+      <section ref={ref as any} className="py-20 md:py-32 bg-slate-900">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center text-slate-400 animate-pulse">
             Loading process steps...
@@ -54,7 +59,7 @@ export function WorkProcess() {
     );
   }
   return (
-    <section className="py-20 md:py-32 bg-slate-900">
+    <section ref={ref as any} className="py-20 md:py-32 bg-slate-900">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <SectionHeader sectionKey="process" />

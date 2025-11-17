@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { Target, Users, Award, TrendingUp, LucideIcon } from "lucide-react";
 import { getCompanyStats, CompanyStat, getSiteSettings, SiteSettings } from "@/lib/api";
 import { SectionHeader } from "./SectionHeader";
+import { useInView } from "@/lib/useInView";
 
 // Icon mapping for stats
 const iconMap: Record<string, LucideIcon> = {
@@ -19,8 +20,12 @@ export function AboutUs() {
   const [achievements, setAchievements] = useState<StatWithIcon[]>([]);
   const [siteSettings, setSiteSettings] = useState<SiteSettings | null>(null);
   const [loading, setLoading] = useState(true);
+  const { ref, isInView } = useInView({ threshold: 0.1, rootMargin: '100px' });
 
   useEffect(() => {
+    // Only fetch when component is in view
+    if (!isInView) return;
+
     async function fetchData() {
       try {
         const [stats, settings] = await Promise.all([
@@ -43,10 +48,10 @@ export function AboutUs() {
     }
 
     fetchData();
-  }, []);
+  }, [isInView]);
 
   return (
-    <section id="about" className="py-20 md:py-32 bg-slate-950">
+    <section ref={ref as any} id="about" className="py-20 md:py-32 bg-slate-950">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <SectionHeader sectionKey="about" />
 
