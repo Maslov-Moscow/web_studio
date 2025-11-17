@@ -11,6 +11,7 @@ import {
   CarouselPrevious,
 } from "./ui/carousel";
 import { getServices, Service } from "@/lib/api";
+import { SectionHeader } from "./SectionHeader";
 
 // Icon mapping
 const iconMap: Record<string, LucideIcon> = {
@@ -73,20 +74,7 @@ export function ServicesBlock() {
     <section id="services" className="py-20 md:py-32 bg-slate-900">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
-        <div className="text-center mb-16">
-          <div className="inline-block mb-4 px-4 py-2 rounded-full bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-500/20">
-            <span className="text-sm bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent font-semibold">
-              Our Services
-            </span>
-          </div>
-          <h2 className="mb-4 text-3xl md:text-4xl font-bold text-white">
-            Complete Digital Solutions for Your Business
-          </h2>
-          <p className="text-lg text-slate-400 max-w-2xl mx-auto">
-            From strategy to implementation, we provide end-to-end digital services
-            to help you succeed in the modern marketplace.
-          </p>
-        </div>
+        <SectionHeader sectionKey="services" />
 
         {/* Desktop: Grid Layout */}
         <div className="hidden md:grid md:grid-cols-3 gap-8">

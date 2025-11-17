@@ -2,41 +2,47 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
-import { getClients, Client } from "@/lib/api";
+import { getClients, Client, getTrustIndicators, TrustIndicator } from "@/lib/api";
+import { SectionHeader } from "./SectionHeader";
+
+// Color mapping for trust indicators
+const colorMap: Record<string, string> = {
+  green: "bg-green-500",
+  blue: "bg-blue-500",
+  purple: "bg-purple-500",
+  red: "bg-red-500",
+  yellow: "bg-yellow-500",
+};
 
 export function ClientsGallery() {
   const [clients, setClients] = useState<Client[]>([]);
+  const [trustIndicators, setTrustIndicators] = useState<TrustIndicator[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function fetchClients() {
+    async function fetchData() {
       try {
-        const data = await getClients();
-        setClients(data);
+        const [clientsData, trustData] = await Promise.all([
+          getClients(),
+          getTrustIndicators()
+        ]);
+        setClients(clientsData);
+        setTrustIndicators(trustData);
       } catch (err) {
-        console.error('Failed to fetch clients:', err);
+        console.error('Failed to fetch clients data:', err);
       } finally {
         setLoading(false);
       }
     }
 
-    fetchClients();
+    fetchData();
   }, []);
 
   return (
     <section id="cases" className="py-20 bg-slate-950">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
-        <div className="text-center mb-12">
-          <div className="inline-block mb-4 px-4 py-2 rounded-full bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-500/20">
-            <span className="text-sm bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent font-semibold">
-              Trusted By
-            </span>
-          </div>
-          <h2 className="text-3xl md:text-4xl font-bold text-white">
-            Companies That Trust Us
-          </h2>
-        </div>
+        <SectionHeader sectionKey="clients" />
 
         {/* Logo Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
@@ -79,18 +85,23 @@ export function ClientsGallery() {
 
         {/* Trust indicators */}
         <div className="mt-16 flex flex-wrap justify-center items-center gap-8 text-sm text-slate-500">
-          <div className="flex items-center gap-2">
-            <div className="h-2 w-2 rounded-full bg-green-500" />
-            <span>100% Money Back Guarantee</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="h-2 w-2 rounded-full bg-blue-500" />
-            <span>NDA Protected</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="h-2 w-2 rounded-full bg-purple-500" />
-            <span>Agile Methodology</span>
-          </div>
+          {loading ? (
+            <>
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="flex items-center gap-2">
+                  <div className="h-2 w-2 rounded-full bg-slate-800 animate-pulse" />
+                  <div className="h-4 w-32 bg-slate-800 rounded animate-pulse" />
+                </div>
+              ))}
+            </>
+          ) : (
+            trustIndicators.map((indicator) => (
+              <div key={indicator.id} className="flex items-center gap-2">
+                <div className={`h-2 w-2 rounded-full ${colorMap[indicator.color] || 'bg-blue-500'}`} />
+                <span>{indicator.text}</span>
+              </div>
+            ))
+          )}
         </div>
       </div>
     </section>

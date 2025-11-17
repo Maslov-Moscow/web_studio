@@ -3,23 +3,31 @@
 import { useState, useEffect } from "react";
 import { Button } from "./ui/button";
 import { ArrowRight, Sparkles } from "lucide-react";
-import { getCompanyStats, CompanyStat } from "@/lib/api";
+import { getCompanyStats, CompanyStat, getHeroSection, HeroSection as HeroSectionType } from "@/lib/api";
 
 export function HeroSection() {
   const [stats, setStats] = useState<CompanyStat[]>([]);
+  const [content, setContent] = useState<HeroSectionType | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function fetchStats() {
+    async function fetchData() {
       try {
-        const data = await getCompanyStats();
+        const [heroData, statsData] = await Promise.all([
+          getHeroSection(),
+          getCompanyStats()
+        ]);
+        setContent(heroData);
         // Take only the first 3 stats for hero section
-        setStats(data.slice(0, 3));
+        setStats(statsData.slice(0, 3));
       } catch (err) {
-        console.error('Failed to fetch stats:', err);
+        console.error('Failed to fetch hero section data:', err);
+      } finally {
+        setLoading(false);
       }
     }
 
-    fetchStats();
+    fetchData();
   }, []);
   return (
     <section className="relative overflow-hidden bg-slate-950 py-20 md:py-32">
@@ -34,43 +42,57 @@ export function HeroSection() {
 
       <div className="container relative mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-4xl text-center">
-          {/* Badge */}
-          <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 backdrop-blur-sm">
-            <Sparkles className="h-4 w-4 text-blue-400" />
-            <span className="text-sm text-slate-300">
-              Цифровые решения для современного бизнеса
-            </span>
-          </div>
+          {loading || !content ? (
+            <div className="animate-pulse space-y-8">
+              <div className="h-10 bg-slate-800 rounded-full w-80 mx-auto"></div>
+              <div className="h-20 bg-slate-800 rounded w-full"></div>
+              <div className="h-16 bg-slate-800 rounded w-3/4 mx-auto"></div>
+              <div className="flex gap-4 justify-center">
+                <div className="h-12 bg-slate-800 rounded w-40"></div>
+                <div className="h-12 bg-slate-800 rounded w-40"></div>
+              </div>
+            </div>
+          ) : (
+            <>
+              {/* Badge */}
+              <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 backdrop-blur-sm">
+                <Sparkles className="h-4 w-4 text-blue-400" />
+                <span className="text-sm text-slate-300">
+                  {content.badge_text}
+                </span>
+              </div>
 
-          {/* Headline */}
-          <h1 className="mb-6 text-4xl md:text-5xl lg:text-6xl font-bold bg-gradient-to-r from-white via-slate-100 to-slate-300 bg-clip-text text-transparent">
-            Трансформируйте свой бизнес с помощью передовых цифровых решений
-          </h1>
+              {/* Headline */}
+              <h1 className="mb-6 text-4xl md:text-5xl lg:text-6xl font-bold bg-gradient-to-r from-white via-slate-100 to-slate-300 bg-clip-text text-transparent">
+                {content.headline}
+              </h1>
 
-          {/* Subheading */}
-          <p className="mb-10 text-lg text-slate-400 max-w-2xl mx-auto">
-            Мы специализируемся на SEO и цифровом маркетинге,
-            разработке программного обеспечения на заказ и интеграции искусственного интеллекта/LLM,
-            чтобы помочь малому и среднему бизнесу в регионе СНГ достичь своих целей цифровой трансформации.
-          </p>
+              {/* Subheading */}
+              <p className="mb-10 text-lg text-slate-400 max-w-2xl mx-auto">
+                {content.subheading}
+              </p>
 
-          {/* CTA Buttons */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <Button
-              size="lg"
-              className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 group"
-            >
-              Start Your Project
-              <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
-            </Button>
-            <Button
-              size="lg"
-              variant="outline"
-              className="border-white/20 hover:bg-white/5"
-            >
-              View Our Work
-            </Button>
-          </div>
+              {/* CTA Buttons */}
+              <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                <Button
+                  size="lg"
+                  className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 group"
+                  onClick={() => window.location.href = content.primary_cta_url}
+                >
+                  {content.primary_cta_text}
+                  <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                </Button>
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="border-white/20 hover:bg-white/5"
+                  onClick={() => window.location.href = content.secondary_cta_url}
+                >
+                  {content.secondary_cta_text}
+                </Button>
+              </div>
+            </>
+          )}
 
           {/* Stats */}
           <div className="mt-16 grid grid-cols-3 gap-8 border-t border-white/10 pt-10">

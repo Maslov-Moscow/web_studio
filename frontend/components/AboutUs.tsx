@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { Target, Users, Award, TrendingUp, LucideIcon } from "lucide-react";
-import { getCompanyStats, CompanyStat } from "@/lib/api";
+import { getCompanyStats, CompanyStat, getSiteSettings, SiteSettings } from "@/lib/api";
+import { SectionHeader } from "./SectionHeader";
 
 // Icon mapping for stats
 const iconMap: Record<string, LucideIcon> = {
@@ -16,33 +17,40 @@ type StatWithIcon = CompanyStat & { IconComponent: LucideIcon };
 
 export function AboutUs() {
   const [achievements, setAchievements] = useState<StatWithIcon[]>([]);
+  const [siteSettings, setSiteSettings] = useState<SiteSettings | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function fetchStats() {
+    async function fetchData() {
       try {
-        const data = await getCompanyStats();
+        const [stats, settings] = await Promise.all([
+          getCompanyStats(),
+          getSiteSettings()
+        ]);
         // Take only the first 4 stats for the about section
-        const statsWithIcons = data.slice(0, 4).map((stat, index) => ({
+        const statsWithIcons = stats.slice(0, 4).map((stat, index) => ({
           ...stat,
           // Assign icons in order: Target, Users, Award, TrendingUp
           IconComponent: [Target, Users, Award, TrendingUp][index] || Target,
         }));
         setAchievements(statsWithIcons);
+        setSiteSettings(settings);
       } catch (err) {
-        console.error('Failed to fetch company stats:', err);
+        console.error('Failed to fetch about section data:', err);
       } finally {
         setLoading(false);
       }
     }
 
-    fetchStats();
+    fetchData();
   }, []);
 
   return (
     <section id="about" className="py-20 md:py-32 bg-slate-950">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid md:grid-cols-2 gap-12 items-center">
+        <SectionHeader sectionKey="about" />
+
+        <div className="grid md:grid-cols-2 gap-12 items-center mt-16">
           {/* Image Placeholder */}
           <div className="order-2 md:order-1">
             <div className="relative">
@@ -60,28 +68,24 @@ export function AboutUs() {
 
           {/* Content */}
           <div className="order-1 md:order-2">
-            <div className="inline-block mb-4 px-4 py-2 rounded-full bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-500/20">
-              <span className="text-sm bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent font-semibold">
-                About Us
-              </span>
-            </div>
+            {loading || !siteSettings ? (
+              <div className="space-y-4">
+                <div className="h-8 bg-slate-800 rounded w-3/4 animate-pulse" />
+                <div className="h-4 bg-slate-800 rounded animate-pulse" />
+                <div className="h-4 bg-slate-800 rounded animate-pulse" />
+                <div className="h-4 bg-slate-800 rounded w-5/6 animate-pulse" />
+              </div>
+            ) : (
+              <>
+                <p className="text-lg text-slate-400 mb-6">
+                  {siteSettings.company_description}
+                </p>
 
-            <h2 className="mb-6 text-3xl md:text-4xl font-bold text-white">
-              Building Digital Success Stories Since 2020
-            </h2>
-
-            <p className="text-lg text-slate-400 mb-6">
-              We are a dynamic web studio specializing in delivering innovative digital
-              solutions for small and medium businesses across the CIS region. Our team
-              of experienced developers, designers, and marketers work together to create
-              solutions that drive real business results.
-            </p>
-
-            <p className="text-lg text-slate-400 mb-8">
-              From SEO optimization and digital marketing to custom software development
-              and AI integration, we provide comprehensive services that help our clients
-              stay ahead in the digital age.
-            </p>
+                <p className="text-lg text-slate-400 mb-8">
+                  {siteSettings.company_tagline}
+                </p>
+              </>
+            )}
 
             {/* Achievements Grid */}
             <div className="grid grid-cols-2 gap-6">
