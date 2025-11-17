@@ -9,14 +9,6 @@ SECRET_KEY = config('SECRET_KEY', default='django-insecure-dev-key-change-in-pro
 DEBUG = config('DEBUG', default=False, cast=bool)
 
 ALLOWED_HOSTS = ["*"]
-CSRF_TRUSTED_ORIGINS = [
-    'http://localhost',
-    'http://localhost:8080',
-    'http://localhost:3000',
-    'http://127.0.0.1',
-    'http://127.0.0.1:8080',
-    'http://127.0.0.1:3000',
-]
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -105,7 +97,14 @@ CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
 
 # CSRF Settings - Permissive for development
-CSRF_TRUSTED_ORIGINS = ['http://*', 'https://*']
+CSRF_TRUSTED_ORIGINS = [
+    'http://localhost',
+    'http://localhost:8080',
+    'http://localhost:3000',
+    'http://127.0.0.1',
+    'http://127.0.0.1:8080',
+    'http://127.0.0.1:3000',
+]
 CSRF_COOKIE_SECURE = False
 CSRF_COOKIE_HTTPONLY = False
 CSRF_COOKIE_SAMESITE = None
