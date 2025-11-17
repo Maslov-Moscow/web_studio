@@ -16,7 +16,15 @@ COPY . .
 # Создаем директорию public если не существует
 RUN mkdir -p public
 
-# Сборка Next.js
+# Принимаем build arguments для Next.js переменных окружения
+ARG NEXT_PUBLIC_USE_MOCK_API
+ARG NEXT_PUBLIC_API_URL
+
+# Передаем их как environment variables для сборки
+ENV NEXT_PUBLIC_USE_MOCK_API=$NEXT_PUBLIC_USE_MOCK_API
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+
+# Сборка Next.js (переменные NEXT_PUBLIC_* будут встроены в код)
 RUN npm run build
 
 # Этап 2: Продакшн

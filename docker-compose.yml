@@ -44,6 +44,11 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+      args:
+        # Передаем переменные окружения во время сборки
+        # Next.js встроит NEXT_PUBLIC_* переменные в код на этапе build
+        - NEXT_PUBLIC_USE_MOCK_API=${NEXT_PUBLIC_USE_MOCK_API:-false}
+        - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-/api}
     container_name: webstudio_frontend
     ports:
       - "3000:3000"
