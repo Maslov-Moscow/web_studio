@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import { getClients, Client } from "@/lib/api";
 
 export function ClientsGallery() {
@@ -51,11 +52,15 @@ export function ClientsGallery() {
               >
                 <div className="text-center">
                   {client.logo_url ? (
-                    <img
-                      src={client.logo_url}
-                      alt={client.name}
-                      className="max-h-16 mx-auto mb-2"
-                    />
+                    <div className="relative w-full h-16 mb-2">
+                      <Image
+                        src={client.logo_url}
+                        alt={client.name}
+                        fill
+                        className="object-contain"
+                        sizes="(max-width: 768px) 50vw, 25vw"
+                      />
+                    </div>
                   ) : (
                     <div className="inline-flex h-16 w-16 items-center justify-center rounded-lg bg-gradient-to-br from-slate-800 to-slate-900 group-hover:from-blue-500/20 group-hover:to-purple-600/20 transition-all duration-300 mb-2">
                       <span className="text-2xl font-bold text-slate-500 group-hover:text-blue-400 transition-colors">
